@@ -92,7 +92,7 @@ export interface CeoReportData {
 // ── Helpers ──
 function fmtN(n: number, unidad: string): string {
   if (unidad === "$MILLONES" || unidad === "$COP") {
-    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
+    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}`;
   }
   return Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
 }

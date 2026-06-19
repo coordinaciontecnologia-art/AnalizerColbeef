@@ -560,7 +560,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
   });
 
   const fmtCOP = (n: number) => {
-    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
+    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}`;
   };
 
   const area2: CeoArea = {
@@ -908,7 +908,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
 
 export function buildExcelSummary(xlData: ExcelData): string {
   const fmtCOP = (n: number) => {
-    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
+    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}`;
   };
 
   const fmtN = (n: number) => Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });

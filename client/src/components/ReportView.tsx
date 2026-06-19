@@ -18,7 +18,7 @@ function toArr(v: unknown): unknown[] {
 
 function fmtCOP(n: number | null | undefined): string {
   if (n == null || isNaN(n)) return "—";
-  return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
+  return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}`;
 }
 
 function semClass(pct: number): "v" | "a" | "r" {

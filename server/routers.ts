@@ -185,7 +185,7 @@ export const appRouter = router({
         // Hoja 1: Resumen CEO
         const fmtN = (n: number) => Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
         const fmtCOP = (n: number) => {
-          return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
+          return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}`;
         };
 
         const rows: unknown[][] = [
