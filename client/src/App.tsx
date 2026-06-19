@@ -5,7 +5,6 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import DashboardLayout from "./components/DashboardLayout";
-import Home from "./pages/Home";
 import Analyzer from "./pages/Analyzer";
 import History from "./pages/History";
 import ReportDetail from "./pages/ReportDetail";
@@ -17,10 +16,13 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
 function Router() {
   return (
     <Switch>
-      {/* Public landing */}
-      <Route path="/" component={Home} />
+      {/* Main analyzer routes */}
+      <Route path="/">
+        <ProtectedLayout>
+          <Analyzer />
+        </ProtectedLayout>
+      </Route>
 
-      {/* Protected routes */}
       <Route path="/analyzer">
         <ProtectedLayout>
           <Analyzer />
