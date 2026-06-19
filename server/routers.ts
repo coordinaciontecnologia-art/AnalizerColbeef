@@ -185,11 +185,7 @@ export const appRouter = router({
         // Hoja 1: Resumen CEO
         const fmtN = (n: number) => Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
         const fmtCOP = (n: number) => {
-          const abs = Math.abs(n);
-          if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
-          if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
-          if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
-          return "$" + n.toFixed(0);
+          return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
         };
 
         const rows: unknown[][] = [
@@ -202,7 +198,7 @@ export const appRouter = router({
         for (const area of ceo.areas) {
           rows.push([`► ${area.nombre}`]);
           for (const f of area.factores) {
-            const isCOP = f.unidad === "$COP";
+            const isCOP = f.unidad === "$COP" || f.unidad === "$MILLONES";
             const fmt = isCOP ? fmtCOP : fmtN;
             rows.push([
               f.factor,

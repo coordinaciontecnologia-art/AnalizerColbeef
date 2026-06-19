@@ -91,12 +91,8 @@ export interface CeoReportData {
 
 // ── Helpers ──
 function fmtN(n: number, unidad: string): string {
-  if (unidad === "$COP") {
-    const abs = Math.abs(n);
-    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
-    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
-    if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
-    return "$" + n.toFixed(0);
+  if (unidad === "$MILLONES" || unidad === "$COP") {
+    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
   }
   return Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
 }
@@ -134,6 +130,7 @@ function pctColor(pct: number): string {
 
 // ── Area Header Row ──
 function AreaHeader({ nombre }: { nombre: string }) {
+  const displayName = nombre === "INGRESOS (COP)" ? "INGRESOS ($MILLONES)" : nombre;
   return (
     <tr>
       <td
@@ -148,7 +145,7 @@ function AreaHeader({ nombre }: { nombre: string }) {
           cursor: "pointer",
         }}
       >
-        ▶ {nombre}
+        ▶ {displayName}
       </td>
     </tr>
   );

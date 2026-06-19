@@ -503,7 +503,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
     if (n.includes("CORTES")) return "kg";
     if (n === "SC") return "kg (SC)";
     if (n.includes("VÍSCERAS")) return "und";
-    return "$COP";
+    return "$MILLONES";
   };
 
   const fmtComent = (tops: PrincipalItem[], unidad: string): string => {
@@ -560,21 +560,17 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
   });
 
   const fmtCOP = (n: number) => {
-    const abs = Math.abs(n);
-    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
-    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
-    if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
-    return "$" + n.toFixed(0);
+    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
   };
 
   const area2: CeoArea = {
-    nombre: "INGRESOS (COP)",
+    nombre: "INGRESOS ($MILLONES)",
     factores: ingOrdenados.map((u) => {
       const pctD = parseFloat(u.dPct);
       const pctA = parseFloat(u.mPct);
       return {
         factor: u.nombre,
-        unidad: "$COP",
+        unidad: "$MILLONES",
         execDia: u.dEjec,
         metaDia: u.dMeta,
         pctDia: pctD,
@@ -912,11 +908,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
 
 export function buildExcelSummary(xlData: ExcelData): string {
   const fmtCOP = (n: number) => {
-    const abs = Math.abs(n);
-    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
-    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
-    if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
-    return "$" + n.toFixed(0);
+    return `$${Math.round(n / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 0 })}M`;
   };
 
   const fmtN = (n: number) => Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
@@ -973,6 +965,6 @@ ${linStr}
 == CONSOLIDADO — POR LÍNEA Y CANAL DE DISTRIBUCIÓN ==
 ${canStr}
 
-== INGRESOS (COP) — POR UNIDAD DE NEGOCIO (Beneficio, Comercialización, Desposte, Ingresos No Oper., Subproductos) ==
+== INGRESOS ($MILLONES) — POR UNIDAD DE NEGOCIO (Beneficio, Comercialización, Desposte, Ingresos No Oper., Subproductos) ==
 ${ingStr}`;
 }
