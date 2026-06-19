@@ -278,7 +278,7 @@ export default function Analyzer() {
               pctOcupacion: mediasPct,
               unidad: "canales",
               semaforo: semFromCapacidad(mediasPct),
-              nota: mediasVal !== null ? `${mediasVal.toLocaleString("es-CO")} de ${mediasCap?.toLocaleString("es-CO") ?? "N/D"} cap. — ${mediasPct !== null ? mediasPct.toFixed(1) + "% ocupado" : ""}` : "Dato disponible con imagen Power BI",
+              nota: mediasVal !== null ? `${Math.round(mediasVal).toLocaleString("es-CO")} de ${mediasCap !== null && mediasCap !== undefined ? Math.round(mediasCap).toLocaleString("es-CO") : "N/D"} cap. — ${mediasPct !== null ? Math.round(mediasPct) + "% ocupado" : ""}` : "Dato disponible con imagen Power BI",
             },
             {
               nombre: "Vísceras",
@@ -287,7 +287,7 @@ export default function Analyzer() {
               pctOcupacion: viscerasPct,
               unidad: "und",
               semaforo: semFromCapacidad(viscerasPct),
-              nota: viscerasVal !== null ? `${viscerasVal.toLocaleString("es-CO")} de ${viscerasCap?.toLocaleString("es-CO") ?? "N/D"} cap. — ${viscerasPct !== null ? viscerasPct.toFixed(1) + "% ocupado" : ""}` : "Dato disponible con imagen Power BI",
+              nota: viscerasVal !== null ? `${Math.round(viscerasVal).toLocaleString("es-CO")} de ${viscerasCap !== null && viscerasCap !== undefined ? Math.round(viscerasCap).toLocaleString("es-CO") : "N/D"} cap. — ${viscerasPct !== null ? Math.round(viscerasPct) + "% ocupado" : ""}` : "Dato disponible con imagen Power BI",
               visceraNeta: viscerasVal !== null && localCeoReport.inventarios && (localCeoReport.inventarios as Array<{ejecutadoDiaAnterior?: number | null}>).length > 1 && (localCeoReport.inventarios as Array<{ejecutadoDiaAnterior?: number | null}>)[1]?.ejecutadoDiaAnterior ? viscerasVal - ((localCeoReport.inventarios as Array<{ejecutadoDiaAnterior?: number | null}>)[1]?.ejecutadoDiaAnterior ?? 0) : null,
             },
             {

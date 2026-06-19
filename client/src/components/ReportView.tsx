@@ -19,8 +19,8 @@ function toArr(v: unknown): unknown[] {
 function fmtCOP(n: number | null | undefined): string {
   if (n == null || isNaN(n)) return "—";
   const abs = Math.abs(n);
-  if (abs >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-  if (abs >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+  if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
+  if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
   if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
   return "$" + n.toFixed(0);
 }
@@ -45,7 +45,12 @@ function semBg(pct: number): string {
 
 function fmtN(n: number | null | undefined): string {
   if (n == null) return "—";
-  return (n || 0).toLocaleString("es-CO", { maximumFractionDigits: 1 });
+  return Math.round(n || 0).toLocaleString("es-CO", { maximumFractionDigits: 0 });
+}
+
+function fmtPct(value: number | string | null | undefined): string {
+  const n = typeof value === "number" ? value : parseFloat(String(value ?? "0").replace("%", ""));
+  return `${Math.round(Number.isFinite(n) ? n : 0)}%`;
 }
 
 function TrendIcon({ pct }: { pct: number }) {
@@ -66,7 +71,7 @@ function PctBadge({ pct }: { pct: number }) {
       border: `1px solid ${semColor(p)}30`,
     }}>
       <TrendIcon pct={p} />
-      {p.toFixed(1)}%
+      {fmtPct(p)}
     </span>
   );
 }
@@ -212,7 +217,7 @@ function canalRank(canal: string): number {
 function fmtDiff(ejec: number, meta: number, isKg: boolean): string {
   const diff = Math.abs(ejec - meta);
   const unit = isKg ? " kg" : " und";
-  const fmtD = diff >= 1000 ? (diff / 1000).toFixed(1) + "K" : diff.toFixed(0);
+  const fmtD = diff >= 1000 ? (diff / 1000).toFixed(0) + "K" : diff.toFixed(0);
   return fmtD + unit;
 }
 
@@ -240,8 +245,8 @@ function TopPrincipalesCell({ items, linea }: { items: PrincipalItem[]; linea: s
   const sobrecumplidos = items.filter((i) => i.diff > 0);
   const fmtItem = (item: PrincipalItem) => {
     const abs = Math.abs(item.diff);
-    const fmtD = abs >= 1000 ? (abs / 1000).toFixed(1) + "K" : abs.toFixed(0);
-    return `${item.nombre}: ${item.diff > 0 ? "+" : "-"}${fmtD} ${unidad} (${item.pct})`;
+    const fmtD = abs >= 1000 ? (abs / 1000).toFixed(0) + "K" : abs.toFixed(0);
+    return `${item.nombre}: ${item.diff > 0 ? "+" : "-"}${fmtD} ${unidad} (${fmtPct(item.pct)})`;
   };
   return (
     <div style={{ fontSize: "0.72rem", lineHeight: 1.5 }}>

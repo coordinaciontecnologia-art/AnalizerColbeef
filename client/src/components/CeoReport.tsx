@@ -93,12 +93,17 @@ export interface CeoReportData {
 function fmtN(n: number, unidad: string): string {
   if (unidad === "$COP") {
     const abs = Math.abs(n);
-    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
+    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
     if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
     return "$" + n.toFixed(0);
   }
-  return n.toLocaleString("es-CO", { maximumFractionDigits: 1 });
+  return Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
+}
+
+function fmtPct(value: number | string | null | undefined): string {
+  const n = typeof value === "number" ? value : parseFloat(String(value ?? "0").replace("%", ""));
+  return `${Math.round(Number.isFinite(n) ? n : 0)}%`;
 }
 
 function SemaforoCircle({ s, size = 14 }: { s: Semaforo; size?: number }) {
@@ -174,12 +179,12 @@ function FceRow({ f, isSubtotal }: { f: CeoFce; isSubtotal?: boolean }) {
       <td style={{ ...cellStyle, fontWeight: 700 }}>{fmtN(f.execDia, f.unidad)}</td>
       <td style={{ ...cellStyle, color: "#64748b" }}>{fmtN(f.metaDia, f.unidad)}</td>
       <td style={{ ...cellStyle, fontWeight: 700, color: pctColor(f.pctDia) }}>
-        {f.pctDia.toFixed(1)}%
+        {fmtPct(f.pctDia)}
       </td>
       <td style={{ ...cellStyle, fontWeight: 700 }}>{fmtN(f.execAcum, f.unidad)}</td>
       <td style={{ ...cellStyle, color: "#64748b" }}>{fmtN(f.metaAcum, f.unidad)}</td>
       <td style={{ ...cellStyle, fontWeight: 700, color: pctColor(f.pctAcum) }}>
-        {f.pctAcum.toFixed(1)}%
+        {fmtPct(f.pctAcum)}
       </td>
       <td style={{ ...cellStyle, textAlign: "left", fontSize: "0.7rem", color: "#475569", whiteSpace: "normal" }}>
         <div><strong>Día:</strong> {f.comentarioDia}</div>
@@ -305,7 +310,7 @@ function InventariosSection({ items }: { items: InventarioItem[] }) {
                       >
                         <span>Cap: {item.capacidad.toLocaleString("es-CO", { maximumFractionDigits: 0 })} {item.unidad}</span>
                         <span style={{ fontWeight: 700, color: sc.text }}>
-                          {(item.pctOcupacion ?? 0).toFixed(1)}% ocupado
+                          {fmtPct(item.pctOcupacion ?? 0)} ocupado
                         </span>
                       </div>
                     </div>
@@ -544,7 +549,7 @@ function EstrategiasSection({
                         </div>
                         <div style={{ textAlign: "right", flexShrink: 0 }}>
                           <span style={{ fontSize: "0.8rem", fontWeight: 700, color: cfg.text }}>
-                            {c.pct.toFixed(1)}%
+                            {fmtPct(c.pct)}
                           </span>
                           <span style={{ fontSize: "0.65rem", color: "#94a3b8", marginLeft: 4 }}>
                             {c.volumen.toLocaleString("es-CO", { maximumFractionDigits: 0 })} {linConc.unidad}
@@ -831,10 +836,10 @@ export default function CeoReport({ data }: CeoReportProps) {
                     </td>
                     <td style={{ padding: "4px 8px", color: "#475569" }}>{a.linea} / {a.canal}</td>
                     <td style={{ padding: "4px 8px", textAlign: "right", color: "#b91c1c", fontWeight: 700 }}>
-                      {a.diff.toFixed(1)} {a.unidad}
+                      {Math.round(a.diff).toLocaleString("es-CO", { maximumFractionDigits: 0 })} {a.unidad}
                     </td>
                     <td style={{ padding: "4px 8px", textAlign: "right", color: "#b91c1c", fontWeight: 700 }}>
-                      {a.pct}
+                      {fmtPct(a.pct)}
                     </td>
                   </tr>
                 ))}
@@ -884,10 +889,10 @@ export default function CeoReport({ data }: CeoReportProps) {
                     </td>
                     <td style={{ padding: "4px 8px", color: "#475569" }}>{a.linea} / {a.canal}</td>
                     <td style={{ padding: "4px 8px", textAlign: "right", color: "#15803d", fontWeight: 700 }}>
-                      +{a.diff.toFixed(1)} {a.unidad}
+                      +{Math.round(a.diff).toLocaleString("es-CO", { maximumFractionDigits: 0 })} {a.unidad}
                     </td>
                     <td style={{ padding: "4px 8px", textAlign: "right", color: "#15803d", fontWeight: 700 }}>
-                      {a.pct}
+                      {fmtPct(a.pct)}
                     </td>
                   </tr>
                 ))}

@@ -209,7 +209,7 @@ export function processExcelBuffer(buffer: Buffer): ExcelData {
         ejec: v.ejec,
         meta: v.meta,
         diff: v.ejec - v.meta,
-        pct: (v.meta > 0 ? ((v.ejec / v.meta) - 1) * 100 : 0).toFixed(1) + "%",
+        pct: (v.meta > 0 ? ((v.ejec / v.meta) - 1) * 100 : 0).toFixed(0) + "%",
       }));
     const desfasados = items.filter((i) => i.diff < 0).sort((a, b) => a.diff - b.diff).slice(0, 3);
     const sobrecumplidos = items.filter((i) => i.diff > 0).sort((a, b) => b.diff - a.diff).slice(0, 3);
@@ -256,8 +256,8 @@ export function processExcelBuffer(buffer: Buffer): ExcelData {
         dMeta,
         mEjec,
         mMeta,
-        dPct: (dMeta > 0 ? (dEjec / dMeta) * 100 : 0).toFixed(1),
-        mPct: (mMeta > 0 ? (mEjec / mMeta) * 100 : 0).toFixed(1),
+        dPct: (dMeta > 0 ? (dEjec / dMeta) * 100 : 0).toFixed(0),
+        mPct: (mMeta > 0 ? (mEjec / mMeta) * 100 : 0).toFixed(0),
         dTop: topPrincipales(rowsDia.filter((r) => r.linea === l), l),
         mTop: topPrincipales(rowsAcum.filter((r) => r.linea === l), l),
       };
@@ -285,8 +285,8 @@ export function processExcelBuffer(buffer: Buffer): ExcelData {
         dMeta,
         mEjec,
         mMeta,
-        dPct: (dMeta > 0 ? (dEjec / dMeta) * 100 : 0).toFixed(1),
-        mPct: (mMeta > 0 ? (mEjec / mMeta) * 100 : 0).toFixed(1),
+        dPct: (dMeta > 0 ? (dEjec / dMeta) * 100 : 0).toFixed(0),
+        mPct: (mMeta > 0 ? (mEjec / mMeta) * 100 : 0).toFixed(0),
         dTop: topPrincipales(rowsDia.filter((r) => r.linea === linea && r.canal === canal), linea),
         mTop: topPrincipales(rowsAcum.filter((r) => r.linea === linea && r.canal === canal), linea),
       };
@@ -368,8 +368,8 @@ export function processExcelBuffer(buffer: Buffer): ExcelData {
             dMeta,
             mEjec,
             mMeta,
-            dPct: (dMeta > 0 ? (dEjec / dMeta) * 100 : 0).toFixed(1),
-            mPct: (mMeta > 0 ? (mEjec / mMeta) * 100 : 0).toFixed(1),
+            dPct: (dMeta > 0 ? (dEjec / dMeta) * 100 : 0).toFixed(0),
+            mPct: (mMeta > 0 ? (mEjec / mMeta) * 100 : 0).toFixed(0),
           };
         })
         .filter((r) => r.mMeta > 0 || r.dMeta > 0 || r.mEjec > 0 || r.dEjec > 0)
@@ -561,8 +561,8 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
 
   const fmtCOP = (n: number) => {
     const abs = Math.abs(n);
-    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
+    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
     if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
     return "$" + n.toFixed(0);
   };
@@ -666,7 +666,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
     if (pctA < 85) {
       const diff = l.mMeta - l.mEjec;
       recomendaciones.push({
-        texto: `${l.nombre} acumula solo ${pctA.toFixed(1)}% de la meta mensual. Déficit de ${diff.toFixed(0)} ${unidad}. Revisar capacidad operativa y programar jornadas adicionales.`,
+        texto: `${l.nombre} acumula solo ${pctA.toFixed(0)}% de la meta mensual. Déficit de ${diff.toFixed(0)} ${unidad}. Revisar capacidad operativa y programar jornadas adicionales.`,
         nivel: "rojo",
       });
     }
@@ -689,7 +689,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
     const pctIng = (ingTotalEjec / ingTotalMeta) * 100;
     if (pctIng < 90) {
       recomendaciones.push({
-        texto: `Ingresos totales al ${pctIng.toFixed(1)}% de la meta acumulada. Revisar canales con mayor brecha y activar acciones comerciales inmediatas.`,
+        texto: `Ingresos totales al ${pctIng.toFixed(0)}% de la meta acumulada. Revisar canales con mayor brecha y activar acciones comerciales inmediatas.`,
         nivel: "amarillo",
       });
     }
@@ -700,7 +700,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
     const pctA = parseFloat(l.mPct);
     if (pctA >= 110) {
       recomendaciones.push({
-        texto: `${l.nombre} supera la meta mensual en ${(pctA - 100).toFixed(1)}%. Evaluar si el sobre-cumplimiento genera presión en inventarios o costos adicionales.`,
+        texto: `${l.nombre} supera la meta mensual en ${(pctA - 100).toFixed(0)}%. Evaluar si el sobre-cumplimiento genera presión en inventarios o costos adicionales.`,
         nivel: "verde",
       });
     }
@@ -813,7 +813,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
       estrategiasComerciales.push({
         tipo: "riesgo",
         titulo: `Alta dependencia en ${linConc.linea}: ${top1Linea.principal.split(" ").slice(0, 3).join(" ")}`,
-        detalle: `En ${linConc.linea} (${linConc.unidad}), ${top1Linea.principal} concentra el ${top1Linea.pct.toFixed(1)}% del volumen de la línea (${top1Linea.volumen.toLocaleString("es-CO", { maximumFractionDigits: 0 })} ${linConc.unidad}). Riesgo crítico si este cliente reduce pedidos. Diversificar urgentemente.`,
+        detalle: `En ${linConc.linea} (${linConc.unidad}), ${top1Linea.principal} concentra el ${top1Linea.pct.toFixed(0)}% del volumen de la línea (${top1Linea.volumen.toLocaleString("es-CO", { maximumFractionDigits: 0 })} ${linConc.unidad}). Riesgo crítico si este cliente reduce pedidos. Diversificar urgentemente.`,
         semaforo: "rojo",
       });
     }
@@ -824,7 +824,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
       estrategiasComerciales.push({
         tipo: "riesgo",
         titulo: `Concentración en ${linConc.linea}: top-3 = ${top3PctLinea.toFixed(0)}%`,
-        detalle: `En ${linConc.linea}, los 3 principales clientes (${nombres}) representan el ${top3PctLinea.toFixed(1)}% del volumen. HHI: ${linConc.hhiLinea.toFixed(0)}. Activar plan de desarrollo de nuevos clientes en esta línea.`,
+        detalle: `En ${linConc.linea}, los 3 principales clientes (${nombres}) representan el ${top3PctLinea.toFixed(0)}% del volumen. HHI: ${linConc.hhiLinea.toFixed(0)}. Activar plan de desarrollo de nuevos clientes en esta línea.`,
         semaforo: top3PctLinea > 80 ? "rojo" : "amarillo",
       });
     }
@@ -878,7 +878,7 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
     .map(([k, v]) => {
       const [linea, canal, principal] = k.split("||");
       const diff = v.ejec - v.meta;
-      const pct = v.meta > 0 ? ((v.ejec / v.meta - 1) * 100).toFixed(1) + "%" : "Sin meta";
+      const pct = v.meta > 0 ? ((v.ejec / v.meta - 1) * 100).toFixed(0) + "%" : "Sin meta";
       const unidad = getUnidad(linea);
       return { linea, canal, principal, diff, pct, unidad };
     });
@@ -913,13 +913,13 @@ export function buildCeoReport(xlData: ExcelData, rows1Raw: { principal: string;
 export function buildExcelSummary(xlData: ExcelData): string {
   const fmtCOP = (n: number) => {
     const abs = Math.abs(n);
-    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+    if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
+    if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
     if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
     return "$" + n.toFixed(0);
   };
 
-  const fmtN = (n: number) => n.toLocaleString("es-CO", { maximumFractionDigits: 1 });
+  const fmtN = (n: number) => Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
 
   const getUnidadLinea = (nombre: string): string => {
     const n = nombre.trim().toUpperCase();

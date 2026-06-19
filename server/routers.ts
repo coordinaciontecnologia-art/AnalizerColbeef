@@ -183,11 +183,11 @@ export const appRouter = router({
         const wb = XLSX.utils.book_new();
 
         // Hoja 1: Resumen CEO
-        const fmtN = (n: number) => n.toLocaleString("es-CO", { maximumFractionDigits: 1 });
+        const fmtN = (n: number) => Math.round(n).toLocaleString("es-CO", { maximumFractionDigits: 0 });
         const fmtCOP = (n: number) => {
           const abs = Math.abs(n);
-          if (abs >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-          if (abs >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+          if (abs >= 1e9) return "$" + (n / 1e9).toFixed(0) + "B";
+          if (abs >= 1e6) return "$" + (n / 1e6).toFixed(0) + "M";
           if (abs >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
           return "$" + n.toFixed(0);
         };
@@ -209,10 +209,10 @@ export const appRouter = router({
               f.unidad,
               fmt(f.execDia),
               fmt(f.metaDia),
-              f.pctDia.toFixed(1) + "%",
+              f.pctDia.toFixed(0) + "%",
               fmt(f.execAcum),
               fmt(f.metaAcum),
-              f.pctAcum.toFixed(1) + "%",
+              f.pctAcum.toFixed(0) + "%",
               f.semaforoDia.toUpperCase(),
               f.semaforoAcum.toUpperCase(),
               f.comentarioDia,
@@ -225,13 +225,13 @@ export const appRouter = router({
         rows.push(["TOP DESFASADOS"]);
         rows.push(["Principal", "Línea", "Canal", "Diferencia", "% Desv.", "Unidad"]);
         for (const a of ceo.alertasDesfasados) {
-          rows.push([a.principal, a.linea, a.canal, a.diff.toFixed(1), a.pct, a.unidad]);
+          rows.push([a.principal, a.linea, a.canal, a.diff.toFixed(0), a.pct, a.unidad]);
         }
         rows.push([]);
         rows.push(["TOP SOBRE-CUMPLIDOS"]);
         rows.push(["Principal", "Línea", "Canal", "Diferencia", "% Desv.", "Unidad"]);
         for (const a of ceo.alertasSobrecumplidos) {
-          rows.push([a.principal, a.linea, a.canal, a.diff.toFixed(1), a.pct, a.unidad]);
+          rows.push([a.principal, a.linea, a.canal, a.diff.toFixed(0), a.pct, a.unidad]);
         }
 
         const ws = XLSX.utils.aoa_to_sheet(rows);
