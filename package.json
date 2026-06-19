@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "pnpm exec vite build && pnpm exec esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "node dist/index.js",
     "start:prod": "node dist/index.js",
     "check": "tsc --noEmit",
@@ -107,6 +107,10 @@
   },
   "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@tailwindcss/oxide"
+    ],
     "patchedDependencies": {
       "wouter@3.7.1": "patches/wouter@3.7.1.patch"
     },

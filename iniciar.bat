@@ -12,7 +12,7 @@ set "PUBLIC_URL=http://%SERVER_IP%:%SERVER_PORT%"
 set "NODE_ENV=development"
 set "DEV_BYPASS_AUTH=true"
 
-set "PATH=C:\Program Files\nodejs;%APPDATA%\npm;%PATH%"
+set "PATH=C:\Program Files\nodejs;%APPDATA%\npm;%CD%\node_modules\.bin;%PATH%"
 
 echo.
 echo   Colbeef - Modo desarrollo
@@ -31,7 +31,7 @@ if errorlevel 1 (
     call npm install -g pnpm
 )
 
-if not exist "node_modules" (
+if not exist "node_modules\.bin\vite.cmd" (
     call pnpm install
 )
 

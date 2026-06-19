@@ -5,7 +5,7 @@ cd /d "%~dp0"
 
 REM ============================================================
 REM  Colbeef Analyzer — Arranque en servidor de red local
-REM  IP del servidor: 192.168.20.205
+REM  IP del servidor: 192.168.20.205  |  Puerto: 5009
 REM ============================================================
 
 set "SERVER_IP=192.168.20.205"
@@ -16,7 +16,7 @@ set "PUBLIC_URL=http://%SERVER_IP%:%SERVER_PORT%"
 set "NODE_ENV=production"
 set "DEV_BYPASS_AUTH=true"
 
-set "PATH=C:\Program Files\nodejs;%APPDATA%\npm;%PATH%"
+set "PATH=C:\Program Files\nodejs;%APPDATA%\npm;%CD%\node_modules\.bin;%PATH%"
 
 echo.
 echo   Colbeef - Analisis Ejecutivo Diario
@@ -36,6 +36,11 @@ where pnpm >nul 2>&1
 if errorlevel 1 (
     echo Instalando pnpm...
     call npm install -g pnpm
+    if errorlevel 1 (
+        echo [ERROR] No se pudo instalar pnpm.
+        pause
+        exit /b 1
+    )
 )
 
 if not exist ".env" (
@@ -46,8 +51,9 @@ if not exist ".env" (
     exit /b 1
 )
 
-if not exist "node_modules" (
-    echo Instalando dependencias ^(primera vez^)...
+REM Instalar dependencias si faltan o vite no esta disponible
+if not exist "node_modules\.bin\vite.cmd" (
+    echo Instalando dependencias ^(puede tardar varios minutos^)...
     call pnpm install
     if errorlevel 1 (
         echo [ERROR] Fallo la instalacion de dependencias.
@@ -57,15 +63,34 @@ if not exist "node_modules" (
     echo.
 )
 
+if not exist "node_modules\.bin\vite.cmd" (
+    echo [ERROR] Vite no se instalo correctamente.
+    echo Ejecuta manualmente: pnpm install
+    pause
+    exit /b 1
+)
+
 if not exist "dist\index.js" (
     echo Compilando aplicacion para produccion...
     call pnpm run build
     if errorlevel 1 (
+        echo.
         echo [ERROR] Fallo la compilacion.
+        echo Prueba manualmente:
+        echo   cd /d "%~dp0"
+        echo   pnpm install
+        echo   pnpm run build
+        echo.
         pause
         exit /b 1
     )
     echo.
+)
+
+if not exist "dist\index.js" (
+    echo [ERROR] No se genero dist\index.js
+    pause
+    exit /b 1
 )
 
 echo   Servidor iniciando...
