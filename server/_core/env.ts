@@ -9,6 +9,6 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   devBypassAuth: process.env.DEV_BYPASS_AUTH === "true",
   host: process.env.HOST ?? "0.0.0.0",
-  port: parseInt(process.env.PORT || "5009", 10),
+  port: parseInt(process.env.PORT || "9030", 10),
   publicUrl: process.env.PUBLIC_URL ?? "",
 };

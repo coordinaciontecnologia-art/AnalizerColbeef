@@ -2,7 +2,7 @@
 REM Ejecutar como Administrador (clic derecho - Ejecutar como administrador)
 chcp 65001 >nul
 
-set "PORT=5009"
+set "PORT=9030"
 set "RULE_NAME=Colbeef Analyzer (TCP %PORT%)"
 
 echo Abriendo puerto %PORT% en el Firewall de Windows...

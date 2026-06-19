@@ -54,7 +54,7 @@ if (-not (Test-Path ".env")) {
 }
 
 Write-Host "Iniciando servidor de desarrollo..." -ForegroundColor Green
-Write-Host "Abre en el navegador: http://localhost:5009/analyzer" -ForegroundColor Cyan
+Write-Host "Abre en el navegador: http://localhost:9030/analyzer" -ForegroundColor Cyan
 Write-Host "Presiona Ctrl+C para detener" -ForegroundColor DarkGray
 Write-Host ""
 

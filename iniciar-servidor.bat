@@ -5,11 +5,11 @@ cd /d "%~dp0"
 
 REM ============================================================
 REM  Colbeef Analyzer — Arranque en servidor de red local
-REM  IP del servidor: 192.168.20.205  |  Puerto: 5009
+REM  IP del servidor: 192.168.20.205  |  Puerto: 9030
 REM ============================================================
 
 set "SERVER_IP=192.168.20.205"
-set "SERVER_PORT=5009"
+set "SERVER_PORT=9030"
 set "HOST=0.0.0.0"
 set "PORT=%SERVER_PORT%"
 set "PUBLIC_URL=http://%SERVER_IP%:%SERVER_PORT%"
