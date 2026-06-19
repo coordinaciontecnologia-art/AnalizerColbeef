@@ -28,7 +28,7 @@ export async function createContext(
 ): Promise<TrpcContext> {
   let user: User | null = null;
 
-  if (ENV.devBypassAuth && !ENV.isProduction) {
+  if (ENV.devBypassAuth) {
     user = await getDevUser();
     return { req: opts.req, res: opts.res, user };
   }
