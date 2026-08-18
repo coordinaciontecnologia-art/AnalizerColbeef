@@ -30,6 +30,56 @@ function mergeXlDataIntoReport(
   };
 }
 
+function buildFallbackReportFromExcel(xlData: ExcelData): Record<string, unknown> {
+  const beneficio = xlData.tablaLineas.find(l => l.nombre.toUpperCase() === "BENEFICIO");
+  const desposte = xlData.tablaLineas.find(l => l.nombre.toUpperCase() === "DESPOSTE");
+
+  return {
+    tipo_reporte: "DATOS GENERALES",
+    fecha: xlData.ultimoDia,
+    hora: new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }),
+    indicadores_generales: {
+      reses_planilladas_real: Math.round(beneficio?.dEjec ?? 0).toString(),
+      reses_planilladas_meta: Math.round(beneficio?.dMeta ?? 0).toString(),
+      reses_desviacion: `${Math.round(parseFloat(beneficio?.dPct ?? "0"))}%`,
+      canales_dia_real: Math.round(desposte?.dEjec ?? 0).toString(),
+      canales_dia_meta: Math.round(desposte?.dMeta ?? 0).toString(),
+      canales_desviacion: `${Math.round(parseFloat(desposte?.dPct ?? "0"))}%`,
+    },
+    desempeno: {
+      beneficio_mes_real: Math.round(beneficio?.mEjec ?? 0).toString(),
+      beneficio_mes_ppto: Math.round(beneficio?.mMeta ?? 0).toString(),
+      beneficio_mes_pct: `${Math.round(parseFloat(beneficio?.mPct ?? "0"))}%`,
+      desposte_mes_real: Math.round(desposte?.mEjec ?? 0).toString(),
+      desposte_mes_ppto: Math.round(desposte?.mMeta ?? 0).toString(),
+      desposte_mes_pct: `${Math.round(parseFloat(desposte?.mPct ?? "0"))}%`,
+    },
+    dias_operativos: {
+      beneficio_ejecutados: xlData.diasTransc.toString(),
+      beneficio_habiles: xlData.diasMes.toString(),
+      desposte_ejecutados: xlData.diasTransc.toString(),
+      desposte_habiles: xlData.diasMes.toString(),
+    },
+    alertas: [],
+    recomendaciones: [
+      {
+        numero: 1,
+        titulo: "Informe generado con datos del Excel",
+        detalle: "La IA externa no respondió, por lo que se generó el informe con las tablas y cálculos del Excel.",
+      },
+    ],
+    comportamiento_metas: [
+      "Reporte generado en modo respaldo con datos del Excel.",
+    ],
+    analisis_excel: {
+      hallazgos_lineas: xlData.tablaLineas.map(l => `${l.nombre}: ${l.mPct}% acumulado`),
+      hallazgos_canales: xlData.tablaLineaCanal.slice(0, 5).map(c => `${c.linea} / ${c.canal}: ${c.mPct}% acumulado`),
+      riesgos_criticos: [],
+      oportunidades: [],
+    },
+  };
+}
+
 // ── AI PROMPT ──
 function buildPrompt(xlSummary: string): string {
   return `Eres analista ejecutivo senior de Colbeef. Analiza el dashboard Power BI (imagen) y los datos del Excel de seguimiento presupuestal (texto).
@@ -291,9 +341,16 @@ export const appRouter = router({
           ];
           const messages = [{ role: "user" as const, content: contentParts }];
 
-          const response = await invokeLLM({ messages, max_tokens: 4000 });
-          const rawText = response.choices?.[0]?.message?.content || "";
-          const reportData = safeParseJSON(typeof rawText === "string" ? rawText : JSON.stringify(rawText));
+          let reportData: Record<string, unknown>;
+          try {
+            const response = await invokeLLM({ messages, max_tokens: 4000 });
+            const rawText = response.choices?.[0]?.message?.content || "";
+            reportData = safeParseJSON(typeof rawText === "string" ? rawText : JSON.stringify(rawText));
+          } catch (llmErr) {
+            if (!xlData) throw llmErr;
+            console.warn("[Reports] IA no disponible, generando respaldo con Excel:", llmErr);
+            reportData = buildFallbackReportFromExcel(xlData);
+          }
           reportData.alertas = filterReportAlerts(reportData.alertas);
 
           const reportDate = (reportData.fecha as string) || new Date().toLocaleDateString("es-CO");
