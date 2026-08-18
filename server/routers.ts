@@ -248,6 +248,7 @@ export const appRouter = router({
         imageUrl: z.string().optional(),
         imageKey: z.string().optional(),
         imageMime: z.string().optional(),
+        imageBase64: z.string().optional(),
         excelSummary: z.string().optional(),
         xlData: z.any().optional(),
         excelBase64: z.string().optional(),
@@ -277,10 +278,15 @@ export const appRouter = router({
         try {
           const xlSummary = excelSummary || "NO HAY DATOS DE EXCEL DISPONIBLES.";
           const prompt = buildPrompt(xlSummary);
+          const inlineImageUrl =
+            input.imageBase64 && input.imageMime
+              ? `data:${input.imageMime};base64,${input.imageBase64}`
+              : undefined;
+          const reportImageUrl = input.imageUrl || inlineImageUrl;
 
           type MsgContent = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string; detail: "high" } };
           const contentParts: MsgContent[] = [
-            ...(input.imageUrl ? [{ type: "image_url" as const, image_url: { url: input.imageUrl, detail: "high" as const } }] : []),
+            ...(reportImageUrl ? [{ type: "image_url" as const, image_url: { url: reportImageUrl, detail: "high" as const } }] : []),
             { type: "text" as const, text: prompt }
           ];
           const messages = [{ role: "user" as const, content: contentParts }];

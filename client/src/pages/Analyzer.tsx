@@ -42,7 +42,6 @@ export default function Analyzer() {
   const imgInputRef = useRef<HTMLInputElement>(null);
   const xlInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadImage = trpc.upload.image.useMutation();
   const uploadExcel = trpc.upload.excel.useMutation();
   const generateReport = trpc.reports.generate.useMutation();
   const utils = trpc.useUtils();
@@ -181,20 +180,11 @@ export default function Analyzer() {
     setCeoReportData(null);
 
     try {
-      let imageUrl: string | undefined;
-      let imageKey: string | undefined;
       let excelSummary: string | undefined;
 
-      // Upload image if provided
+      // La imagen se envía directa a la IA para no depender de almacenamiento externo.
       if (imgB64) {
-        toast.info("Subiendo imagen...");
-        const imgResult = await uploadImage.mutateAsync({
-          base64: imgB64,
-          mimeType: imgMime,
-          filename: imgName || "dashboard.jpg",
-        });
-        imageUrl = imgResult.url;
-        imageKey = imgResult.key;
+        toast.info("Preparando imagen...");
       }
 
       // Process Excel if provided
@@ -217,9 +207,8 @@ export default function Analyzer() {
       // Generate AI report
       toast.info("Analizando con IA...");
       const result = await generateReport.mutateAsync({
-        imageUrl,
-        imageKey,
         imageMime: imgMime,
+        imageBase64: imgB64 ?? undefined,
         excelSummary,
         excelBase64: xlB64 ?? undefined,
         excelFilename: xlName || undefined,
@@ -325,7 +314,7 @@ export default function Analyzer() {
     }
   };
 
-  const isLoading = uploadImage.isPending || uploadExcel.isPending || generateReport.isPending;
+  const isLoading = uploadExcel.isPending || generateReport.isPending;
 
   return (
     <div className="space-y-6">
@@ -460,7 +449,7 @@ export default function Analyzer() {
         {isLoading && (
           <div className="text-center">
             <p className="text-xs" style={{ color: "#78909c" }}>
-              {uploadImage.isPending ? "Subiendo imagen..." : uploadExcel.isPending ? "Procesando Excel..." : "Analizando con IA..."}
+              {uploadExcel.isPending ? "Procesando Excel..." : "Analizando con IA..."}
             </p>
             <div className="mx-auto mt-2" style={{ width: 300, height: 5, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" }}>
               <div
