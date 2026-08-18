@@ -70,22 +70,24 @@ if not exist "node_modules\.bin\vite.cmd" (
     exit /b 1
 )
 
-if not exist "dist\index.js" (
-    echo Compilando aplicacion para produccion...
-    call pnpm run build
-    if errorlevel 1 (
-        echo.
-        echo [ERROR] Fallo la compilacion.
-        echo Prueba manualmente:
-        echo   cd /d "%~dp0"
-        echo   pnpm install
-        echo   pnpm run build
-        echo.
-        pause
-        exit /b 1
-    )
+echo Limpiando build anterior...
+if exist "dist" rmdir /s /q "dist"
+echo.
+
+echo Compilando aplicacion para produccion...
+call pnpm run build
+if errorlevel 1 (
     echo.
+    echo [ERROR] Fallo la compilacion.
+    echo Prueba manualmente:
+    echo   cd /d "%~dp0"
+    echo   pnpm install
+    echo   pnpm run build
+    echo.
+    pause
+    exit /b 1
 )
+echo.
 
 if not exist "dist\index.js" (
     echo [ERROR] No se genero dist\index.js
