@@ -328,11 +328,25 @@ export const appRouter = router({
         try {
           const xlSummary = excelSummary || "NO HAY DATOS DE EXCEL DISPONIBLES.";
           const prompt = buildPrompt(xlSummary);
-          const inlineImageUrl =
-            input.imageBase64 && input.imageMime
-              ? `data:${input.imageMime};base64,${input.imageBase64}`
-              : undefined;
-          const reportImageUrl = input.imageUrl || inlineImageUrl;
+          const inlineImageUrl = input.imageBase64 && input.imageMime
+            ? `data:${input.imageMime};base64,${input.imageBase64}`
+            : undefined;
+          let reportImageUrl = input.imageUrl || "";
+          let reportImageKey = input.imageKey;
+
+          if (!reportImageUrl && input.imageBase64 && input.imageMime) {
+            try {
+              const buffer = Buffer.from(input.imageBase64, "base64");
+              const ext = input.imageMime.split("/")[1] || "jpg";
+              const key = `colbeef/${ctx.user.id}/images/${nanoid()}.${ext}`;
+              const uploaded = await storagePut(key, buffer, input.imageMime);
+              reportImageUrl = uploaded.url;
+              reportImageKey = uploaded.key;
+            } catch (uploadErr) {
+              console.warn("[Reports] No se pudo publicar imagen, usando base64 inline:", uploadErr);
+              reportImageUrl = inlineImageUrl || "";
+            }
+          }
 
           type MsgContent = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string; detail: "high" } };
           const contentParts: MsgContent[] = [
@@ -365,6 +379,8 @@ export const appRouter = router({
             title: `Informe ${reportType} — ${reportDate}`,
             reportDate,
             reportType,
+            imageUrl: reportImageUrl && !reportImageUrl.startsWith("data:") ? reportImageUrl : undefined,
+            imageKey: reportImageKey,
             reportData: mergedReportData,
           });
 
