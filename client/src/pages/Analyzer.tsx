@@ -223,6 +223,9 @@ export default function Analyzer() {
         const aiData = result.reportData as Record<string, unknown>;
         const indGen = (aiData.indicadores_generales ?? {}) as Record<string, string>;
         const invCarnes = (aiData.inventario_carnes ?? {}) as Record<string, string>;
+        const aiFecha = typeof aiData.fecha === "string" && aiData.fecha.trim()
+          ? aiData.fecha.trim()
+          : localCeoReport.fecha;
 
         const parseNum = (v: string | null | undefined): number | null => {
           if (!v) return null;
@@ -259,6 +262,7 @@ export default function Analyzer() {
 
         const enrichedCeo = {
           ...localCeoReport,
+          fecha: aiFecha,
           inventarios: [
             {
               nombre: "Medias canales",
