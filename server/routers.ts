@@ -317,15 +317,20 @@ export const appRouter = router({
           excelSummary = buildExcelSummary(xlData);
         }
 
-        // Create pending report
-        const reportId = await createReport({
-          userId: ctx.user.id,
-          title: `Informe ${new Date().toLocaleDateString("es-CO")}`,
-          status: "processing",
-          imageUrl: input.imageUrl,
-          imageKey: input.imageKey,
-          excelSummary: excelSummary ?? undefined,
-        });
+        // Guardar en historial no debe bloquear la generación del informe.
+        let reportId: number | null = null;
+        try {
+          reportId = await createReport({
+            userId: ctx.user.id,
+            title: `Informe ${new Date().toLocaleDateString("es-CO")}`,
+            status: "processing",
+            imageUrl: input.imageUrl,
+            imageKey: input.imageKey,
+            excelSummary: excelSummary ? excelSummary.slice(0, 60000) : undefined,
+          });
+        } catch (dbErr) {
+          console.warn("[Reports] No se pudo crear registro en historial; se generara sin guardar:", dbErr);
+        }
 
         try {
           const xlSummary = excelSummary || "NO HAY DATOS DE EXCEL DISPONIBLES.";
@@ -380,22 +385,31 @@ export const appRouter = router({
             xlData
           );
 
-          await updateReport(reportId, {
-            status: "completed",
-            title: `Informe ${reportType} — ${reportDate}`,
-            reportDate,
-            reportType,
-            imageUrl: reportImageUrl && !reportImageUrl.startsWith("data:") ? reportImageUrl : undefined,
-            imageKey: reportImageKey,
-            reportData: mergedReportData,
-          });
+          if (reportId) {
+            try {
+              await updateReport(reportId, {
+                status: "completed",
+                title: `Informe ${reportType} — ${reportDate}`,
+                reportDate,
+                reportType,
+                imageUrl: reportImageUrl && !reportImageUrl.startsWith("data:") ? reportImageUrl : undefined,
+                imageKey: reportImageKey,
+                reportData: mergedReportData,
+              });
+            } catch (dbErr) {
+              console.warn("[Reports] Informe generado, pero no se pudo guardar en historial:", dbErr);
+              reportId = null;
+            }
+          }
 
-          return { reportId, reportData: mergedReportData, reportDate, reportType };
+          return { reportId: reportId ?? 0, reportData: mergedReportData, reportDate, reportType };
         } catch (err) {
-          await updateReport(reportId, {
-            status: "error",
-            errorMessage: (err as Error).message,
-          });
+          if (reportId) {
+            await updateReport(reportId, {
+              status: "error",
+              errorMessage: (err as Error).message,
+            }).catch((dbErr) => console.warn("[Reports] No se pudo guardar error en historial:", dbErr));
+          }
           throw err;
         }
       }),
