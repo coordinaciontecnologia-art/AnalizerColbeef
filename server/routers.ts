@@ -184,6 +184,102 @@ function safeParseJSON(raw: string): Record<string, unknown> {
   return JSON.parse(s);
 }
 
+function mergeImageMetrics(
+  reportData: Record<string, unknown>,
+  imageData: Record<string, unknown>
+): Record<string, unknown> {
+  const isMeaningful = (value: unknown) =>
+    value !== null &&
+    value !== undefined &&
+    String(value).trim() !== "" &&
+    String(value).trim() !== "—";
+
+  const mergeObject = (current: unknown, next: unknown) => ({
+    ...((current ?? {}) as Record<string, unknown>),
+    ...Object.fromEntries(
+      Object.entries((next ?? {}) as Record<string, unknown>).filter(([, value]) => isMeaningful(value))
+    ),
+  });
+
+  const merged: Record<string, unknown> = {
+    ...reportData,
+    indicadores_generales: mergeObject(reportData.indicadores_generales, imageData.indicadores_generales),
+    dias_operativos: mergeObject(reportData.dias_operativos, imageData.dias_operativos),
+    inventario_carnes: mergeObject(reportData.inventario_carnes, imageData.inventario_carnes),
+  };
+
+  if (isMeaningful(imageData.fecha)) merged.fecha = imageData.fecha;
+  if (isMeaningful(imageData.hora)) merged.hora = imageData.hora;
+  if (Array.isArray(imageData.productos_inventario) && imageData.productos_inventario.length > 0) {
+    merged.productos_inventario = imageData.productos_inventario;
+  }
+
+  return merged;
+}
+
+async function extractImageMetrics(reportImageUrl: string): Promise<Record<string, unknown>> {
+  const prompt = `Lee SOLO la imagen del dashboard Power BI de Colbeef y devuelve SOLO JSON válido sin markdown.
+Extrae los números visibles. No uses datos de Excel ni inventes valores.
+
+Estructura exacta:
+{
+  "fecha":"DD/MM/YYYY",
+  "hora":"HH:MM",
+  "indicadores_generales":{
+    "reses_planilladas_real":"",
+    "reses_planilladas_meta":"",
+    "canales_dia_real":"",
+    "canales_dia_meta":"",
+    "canales_despostadas":"",
+    "reses_corrales":"",
+    "inv_medias_canales":"",
+    "inv_medias_cap":"",
+    "inv_medias_pct":"",
+    "inv_visceras":"",
+    "inv_visceras_cap":"",
+    "inv_visceras_pct":"",
+    "hembras":"",
+    "machos":""
+  },
+  "dias_operativos":{
+    "beneficio_ejecutados":"",
+    "beneficio_habiles":"",
+    "desposte_ejecutados":"",
+    "desposte_habiles":"",
+    "kg_desposte":"",
+    "congelado":"",
+    "refrigerado":""
+  },
+  "inventario_carnes":{
+    "total_kilos":"",
+    "cava":"",
+    "cortes":"",
+    "congelado":"",
+    "refrigerado":"",
+    "alistamiento":"",
+    "subproductos":"",
+    "etiquetado":""
+  },
+  "productos_inventario":[]
+}`;
+
+  type MsgContent = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string; detail: "high" } };
+  const messages = [{
+    role: "user" as const,
+    content: [
+      { type: "image_url" as const, image_url: { url: reportImageUrl, detail: "high" as const } },
+      { type: "text" as const, text: prompt },
+    ] satisfies MsgContent[],
+  }];
+  const response = await invokeLLM({
+    messages,
+    max_tokens: 1500,
+    response_format: { type: "json_object" },
+  });
+  const rawText = response.choices?.[0]?.message?.content || "";
+  return safeParseJSON(typeof rawText === "string" ? rawText : JSON.stringify(rawText));
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -376,6 +472,16 @@ export const appRouter = router({
             console.warn("[Reports] IA no disponible, generando respaldo con Excel:", llmErr);
             reportData = buildFallbackReportFromExcel(xlData);
           }
+
+          if (reportImageUrl) {
+            try {
+              const imageMetrics = await extractImageMetrics(reportImageUrl);
+              reportData = mergeImageMetrics(reportData, imageMetrics);
+            } catch (imageErr) {
+              console.warn("[Reports] No se pudieron extraer metricas dedicadas de la imagen:", imageErr);
+            }
+          }
+
           reportData.alertas = filterReportAlerts(reportData.alertas);
 
           const reportDate = (reportData.fecha as string) || new Date().toLocaleDateString("es-CO");
