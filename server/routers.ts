@@ -156,6 +156,8 @@ INSTRUCCIÓN: Devuelve SOLO JSON válido sin markdown. Estructura exacta:
 
 Extrae valores REALES de la imagen y cruza con los datos del Excel. analisis_excel debe contener insights profundos del cruce.
 
+FECHA DEL REPORTE: si la imagen del dashboard muestra una fecha visible, usa esa fecha en el campo "fecha". El Excel puede tener un corte distinto; no uses la fecha del Excel para el encabezado cuando contradiga la fecha visible de la imagen.
+
 IMPORTANTE: NO incluyas la alerta "Sacrificio del día en cero" ni alertas sobre reses planilladas/canales del día en 0 cuando el dashboard muestra esos KPIs en cero — eso es normal al final del día y no debe reportarse como alerta crítica.
 
 Solo JSON.`;
@@ -357,7 +359,11 @@ export const appRouter = router({
 
           let reportData: Record<string, unknown>;
           try {
-            const response = await invokeLLM({ messages, max_tokens: 4000 });
+            const response = await invokeLLM({
+              messages,
+              max_tokens: 4000,
+              response_format: { type: "json_object" },
+            });
             const rawText = response.choices?.[0]?.message?.content || "";
             reportData = safeParseJSON(typeof rawText === "string" ? rawText : JSON.stringify(rawText));
           } catch (llmErr) {

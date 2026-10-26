@@ -314,7 +314,8 @@ export default function Analyzer() {
         document.getElementById("ceo-report-section")?.scrollIntoView({ behavior: "smooth" });
       }, 300);
     } catch (err) {
-      toast.error("Error al generar el informe: " + (err as Error).message);
+      const message = (err as Error).message || "Error desconocido";
+      toast.error(`Error al generar el informe: ${message.slice(0, 220)}${message.length > 220 ? "..." : ""}`);
     }
   };
 
